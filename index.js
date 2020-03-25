@@ -42,5 +42,5 @@ fs.writeFileSync(OUTPUT_PATH, out, {
 function formTranslation(name, index, value) {
     const tName = `${name}_${index}`;
     return `String get ${tName} =>
-        Intl.message('${value}', name: '${tName}')`;
+        Intl.message('${value}', name: '${tName}');`;
 }
