@@ -1,0 +1,13 @@
+{
+  "name": "android_to_flutter_localizations",
+  "version": "0.0.0",
+  "description": "Converts Android localizations to Flutter intl localizations",
+  "main": "index.js",
+  "author": "@kristijorgji",
+  "license": "MIT",
+  "dependencies": {
+    "xml-query": "^1.5.0",
+    "xml-reader": "^2.4.3",
+    "yargs": "^15.3.1"
+  }
+}
