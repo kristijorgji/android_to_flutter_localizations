@@ -18,6 +18,7 @@ const argv = require('yargs')
 
 const INPUT_PATH = argv.inputPath;
 const OUTPUT_PATH = argv.outputPath;
+const STRING_ARRAY_TO_JSON = argv.stringArrayToJson || false;
 
 const content = fs.readFileSync(INPUT_PATH, 'utf8');
 const ast = XmlReader.parseSync(content);
@@ -32,7 +33,8 @@ for (let i = 0; i < first.children.length; i++) {
     if (child.name === NodeType.STRING) {
         out += parseStringType(child);
     } else if (child.name === NodeType.STRING_ARRAY) {
-        out += parseStringArray(child);
+        out += STRING_ARRAY_TO_JSON
+            ? parseStringArrayToJsonString(child) : parseStringArray(child);
     }
 }
 
@@ -55,6 +57,21 @@ function parseStringArray(node) {
         out += formArrayTranslation(node.attributes.name, i, child.children[0].value) + EOL;
     }
     out += EOL;
+
+    return out;
+}
+
+function parseStringArrayToJsonString(node) {
+    let out = '';
+    let values = [];
+    for (let i = 0; i < node.children.length; i++) {
+        const child = node.children[i];
+        if (child.children.length === 0) {
+            continue;
+        }
+        values.push(child.children[0].value);
+    }
+    out += formTranslation(node.attributes.name, JSON.stringify(values)) + EOL;
 
     return out;
 }
