@@ -1,3 +1,5 @@
+const NodeType = require('./NodeType');
+
 const fs = require('fs');
 const xmlQuery = require('xml-query');
 const XmlReader = require('xml-reader');
@@ -21,26 +23,47 @@ const content = fs.readFileSync(INPUT_PATH, 'utf8');
 const ast = XmlReader.parseSync(content);
 const xq = xmlQuery(ast);
 
-const stringArrays = xq.find('string-array');
+const first = xq.first().ast;
+
 let out = '';
-stringArrays.each(node => {
-    for (let i = 0; i < node.children.length; i++) {
-        const child = node.children[i];
-        if (child.children.length === 0) {
-            continue;
-        }
-        out += formTranslation(node.attributes.name, i, child.children[0].value) + EOL;
+
+for (let i = 0; i < first.children.length; i++) {
+    const child = first.children[i];
+    if (child.name === NodeType.STRING) {
+        out += parseStringType(child);
+    } else if (child.name === NodeType.STRING_ARRAY) {
+        out += parseStringArray(child);
     }
-    out += EOL;
-});
+}
 
 fs.writeFileSync(OUTPUT_PATH, out, {
     encoding: 'utf8',
     flag: 'w'
 },);
 
-function formTranslation(name, index, value) {
-    const tName = `${name}_${index}`;
-    return `String get ${tName} =>
-        Intl.message('${value}', name: '${tName}');`;
+function parseStringType(node) {
+    return formTranslation(node.attributes.name, node.children[0].value) + EOL;
+}
+
+function parseStringArray(node) {
+    let out = EOL;
+    for (let i = 0; i < node.children.length; i++) {
+        const child = node.children[i];
+        if (child.children.length === 0) {
+            continue;
+        }
+        out += formArrayTranslation(node.attributes.name, i, child.children[0].value) + EOL;
+    }
+    out += EOL;
+
+    return out;
+}
+
+function formTranslation(name, value) {
+    return `String get ${name} =>
+        Intl.message('${value}', name: '${name}');`;
+}
+
+function formArrayTranslation(name, index, value) {
+    return formTranslation(`${name}_${index}`, value);
 }
